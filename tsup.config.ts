@@ -9,6 +9,5 @@ export default defineConfig({
   clean: true,
   treeshake: true,
   minify: false,
-  external: ['vite'],
-  onSuccess: 'tsc --emitDeclarationOnly --declaration'
+  external: ['vite']
 })
