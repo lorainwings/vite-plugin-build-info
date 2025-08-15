@@ -1,0 +1,249 @@
+import { simpleGit } from 'simple-git'
+import type { ReleaseInfoOptions, BuildMetadata } from './types'
+
+interface GitBranch {
+  current?: string
+}
+
+interface GitCommit {
+  latest?: {
+    hash?: string
+    message?: string
+    author_name?: string
+    author_email?: string
+    date?: string
+  }
+}
+
+interface GitRemote {
+  refs?: {
+    fetch?: string
+  }
+}
+
+interface GitTags {
+  latest?: string
+}
+
+interface PackageJson {
+  version?: string
+}
+
+const getBuildTimeInfo = (): { buildTime: string; buildTimestamp: number } => {
+  const now = new Date()
+  return {
+    buildTime: now.toLocaleString(),
+    buildTimestamp: now.getTime()
+  }
+}
+
+// 纯函数：获取 Node.js 版本
+const getNodeVersion = (): string => process.version
+
+// 纯函数：获取版本信息
+const getVersionInfo = async (): Promise<string | undefined> => {
+  try {
+    const pkg = await import('../package.json', { assert: { type: 'json' } })
+    const packageData = pkg as { default?: PackageJson } & PackageJson
+    return packageData.default?.version ?? packageData.version
+  } catch {
+    return undefined
+  }
+}
+
+// 纯函数：获取 Git 信息
+const getGitInfo = async (): Promise<BuildMetadata['git'] | undefined> => {
+  try {
+    const git = simpleGit()
+    const [branch, commit, remote, tags] = await Promise.all([
+      git.branch().catch(() => ({ current: undefined }) as GitBranch),
+      git
+        .log({ maxCount: 1 })
+        .catch(() => ({ latest: undefined }) as GitCommit),
+      git.getRemotes(true).catch(() => [] as GitRemote[]),
+      git.tags().catch(() => ({ latest: undefined }) as GitTags)
+    ])
+
+    const latestTag = tags?.latest
+    const short = commit?.latest?.hash
+      ? commit.latest.hash.slice(0, 7)
+      : undefined
+
+    let commitTime: string | undefined
+    if (commit?.latest?.date) {
+      try {
+        const date = new Date(commit.latest.date)
+        commitTime = date.toLocaleString()
+      } catch {
+        commitTime = commit.latest.date
+      }
+    }
+
+    return {
+      branch: branch?.current,
+      commit: commit?.latest?.hash,
+      commitHash: commit?.latest?.hash,
+      commitMessage: commit?.latest?.message,
+      author: commit?.latest?.author_name,
+      email: commit?.latest?.author_email,
+      remote: remote[0]?.refs?.fetch,
+      tag: latestTag,
+      short,
+      commitTime
+    }
+  } catch {
+    return undefined
+  }
+}
+
+// 纯函数：获取 CI 信息
+const getCiInfo = (): BuildMetadata['ci'] | undefined => {
+  const jenkinsNodeName = process.env.JENKINS_NODE_NAME
+  const jenkinsExecutorNumber = process.env.EXECUTOR_NUMBER
+  const jenkinsBuildNumber = process.env.BUILD_NUMBER
+  const jenkinsJobName = process.env.JOB_NAME
+  const githubRunId = process.env.GITHUB_RUN_ID
+  const githubRunNumber = process.env.GITHUB_RUN_NUMBER
+  const containerId = process.env.HOSTNAME
+
+  const provider = process.env.JENKINS_HOME
+    ? 'jenkins'
+    : process.env.GITHUB_ACTIONS
+      ? 'github-actions'
+      : process.env.CI
+        ? 'generic-ci'
+        : undefined
+
+  if (
+    jenkinsNodeName ||
+    jenkinsExecutorNumber ||
+    jenkinsBuildNumber ||
+    jenkinsJobName ||
+    githubRunId ||
+    githubRunNumber ||
+    provider ||
+    containerId
+  ) {
+    return {
+      jenkinsNodeName,
+      jenkinsExecutorNumber,
+      jenkinsBuildNumber,
+      jenkinsJobName,
+      githubRunId,
+      githubRunNumber,
+      provider,
+      containerId
+    }
+  }
+
+  return undefined
+}
+
+// 纯函数：获取环境变量信息
+const getEnvironmentInfo = (
+  envPrefixes: string[]
+): Record<string, string> | undefined => {
+  const envInfo: Record<string, string> = {}
+
+  for (const [key, value] of Object.entries(process.env)) {
+    if (envPrefixes.some((prefix) => key.startsWith(prefix))) {
+      envInfo[key] = value || ''
+    }
+  }
+
+  return Object.keys(envInfo).length > 0 ? envInfo : undefined
+}
+
+// 纯函数：处理自定义字段
+const processCustomFields = async (
+  customFields: Record<
+    string,
+    | string
+    | number
+    | boolean
+    | (() => string | number | boolean | Promise<string | number | boolean>)
+  >
+): Promise<Record<string, string | number | boolean> | undefined> => {
+  if (Object.keys(customFields).length === 0) {
+    return undefined
+  }
+
+  const customInfo: Record<string, string | number | boolean> = {}
+
+  for (const [key, value] of Object.entries(customFields)) {
+    try {
+      if (typeof value === 'function') {
+        const resolved = await (
+          value as () =>
+            | string
+            | number
+            | boolean
+            | Promise<string | number | boolean>
+        )()
+        customInfo[key] = resolved as string | number | boolean
+      } else {
+        customInfo[key] = value as string | number | boolean
+      }
+    } catch (error) {
+      console.warn(
+        `[vite-plugin-release-info] Failed to get custom field "${key}":`,
+        error
+      )
+    }
+  }
+
+  return Object.keys(customInfo).length > 0 ? customInfo : undefined
+}
+
+// 主函数：生成元数据
+export const generateMetadata = async (
+  options: ReleaseInfoOptions = {}
+): Promise<BuildMetadata> => {
+  const {
+    customFields = {},
+    includeBuildTime = true,
+    includeVersion = true,
+    includeGitInfo = true,
+    includeNodeVersion = true,
+    includeEnvInfo = false,
+    envPrefixes = ['NODE_ENV', 'VITE_', 'JENKINS_', 'CI_']
+  } = options
+
+  // 使用函数组合的方式构建元数据
+  const metadata: Partial<BuildMetadata> = {}
+
+  // 构建时间
+  if (includeBuildTime) {
+    const buildTimeInfo = getBuildTimeInfo()
+    metadata.buildTime = buildTimeInfo.buildTime
+    metadata.buildTimestamp = buildTimeInfo.buildTimestamp
+  }
+
+  // Node.js 版本
+  if (includeNodeVersion) {
+    metadata.nodeVersion = getNodeVersion()
+  }
+
+  // 版本信息
+  if (includeVersion) {
+    metadata.version = await getVersionInfo()
+  }
+
+  // Git 信息
+  if (includeGitInfo) {
+    metadata.git = await getGitInfo()
+  }
+
+  // CI 信息
+  metadata.ci = getCiInfo()
+
+  // 环境变量信息
+  if (includeEnvInfo) {
+    metadata.env = getEnvironmentInfo(envPrefixes)
+  }
+
+  // 自定义字段
+  metadata.custom = await processCustomFields(customFields)
+
+  return metadata as BuildMetadata
+}

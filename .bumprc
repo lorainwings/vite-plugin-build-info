@@ -1,0 +1,6 @@
+{
+  "files": ["package.json"],
+  "commit": "chore: release v{{version}}",
+  "tag": "v{{version}}",
+  "push": true
+}

@@ -1,0 +1,98 @@
+{
+  "name": "vite-plugin-release-info",
+  "version": "0.0.4",
+  "description": "A Vite plugin for injecting release metadata and version information into index.html",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts,.js,.mjs --fix",
+    "lint:check": "eslint src --ext .ts,.js,.mjs",
+    "lint:format": "eslint src --ext .ts,.js,.mjs --fix && prettier --write \"src/**/*.{ts,js,json,md}\"",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "format": "prettier --write \"src/**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json,md}\"",
+    "release": "bumpp package.json --commit --push --tag",
+    "bumpp:patch": "bumpp package.json --commit --push --tag patch && pnpm run changelog",
+    "bumpp:minor": "bumpp package.json --commit --push --tag minor && pnpm run changelog",
+    "bumpp:major": "bumpp package.json --commit --push --tag major && pnpm run changelog",
+    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s",
+    "changelog:preview": "conventional-changelog -p conventionalcommits",
+    "prepare": "husky",
+    "example": "cd example && pnpm run dev",
+    "example:build": "cd example && pnpm run build"
+  },
+  "keywords": [
+    "vite",
+    "plugin",
+    "meta",
+    "inject",
+    "version",
+    "release",
+    "html",
+    "metadata"
+  ],
+  "author": "HHFE Team",
+  "license": "MIT",
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.33.0",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "bumpp": "^10.0.0",
+    "conventional-changelog-cli": "^5.0.0",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "peerDependencies": {
+    "vite": "^4.0.0 || ^5.0.0"
+  },
+  "dependencies": {
+    "simple-git": "^3.20.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lorainwings/vite-plugin-release-info"
+  },
+  "bugs": {
+    "url": "https://github.com/lorainwings/vite-plugin-release-info/issues"
+  },
+  "homepage": "https://github.com/lorainwings/vite-plugin-release-info#readme"
+}
