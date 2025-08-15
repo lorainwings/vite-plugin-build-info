@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documentation updates...
 
-## [0.0.1] - 2025-08-15
+## [0.0.3] - 2025-08-27
 
 ### 🎉 Initial Release
 
@@ -72,7 +72,7 @@ This is the first official release of the `vite-plugin-release-info` plugin, pro
 ### 📦 Package Information
 
 - **Package Name**: `vite-plugin-release-info`
-- **Version**: 0.0.1
+- **Version**: 0.0.3
 - **License**: MIT
 - **Node.js Requirement**: >= 18.0.0
 - **Vite Compatibility**: ^4.0.0 || ^5.0.0
@@ -127,7 +127,7 @@ vite-plugin-release-info/
 ├── tests/                # Test files
 ├── example/              # Usage examples
 ├── dist/                 # Build output
-└── docs/                 # Documentation
+└── docs/                 # Documentation (README, CONTRIBUTING, CHANGELOG)
 ```
 
 ### 🧪 Testing and Building

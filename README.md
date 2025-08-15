@@ -62,6 +62,8 @@ export default defineConfig({
 })
 ```
 
+**注意**：插件默认只在生产构建时注入元数据。如需在开发模式下也注入，请设置 `injectInDev: true`。
+
 ### 高级配置
 
 ```typescript
@@ -108,7 +110,7 @@ export default defineConfig({
 
 ## 📖 API 文档
 
-### MetaInjectOptions
+### ReleaseInfoOptions
 
 | 选项 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -147,6 +149,7 @@ interface BuildMetadata {
     remote?: string          // 远程仓库地址
     tag?: string             // 最新标签
     short?: string           // 短提交哈希（前7位）
+    commitTime?: string      // 提交时间
   }
   nodeVersion: string        // Node.js 版本
   ci?: {                     // CI 信息
@@ -178,6 +181,9 @@ interface BuildMetadata {
   <script>
     // 访问注入的构建信息
     console.log(window.__BUILD_META__)
+
+    // 或者如果配置了自定义变量名
+    // console.log(window.BUILD_INFO)
   </script>
 </body>
 </html>
@@ -238,53 +244,84 @@ releaseInfo({
 })
 ```
 
+**Console.log 特性**：
+
+- 使用彩色样式输出，标签有深色背景，值有绿色背景
+- 支持三种输出格式：simple（单行）、detailed（分组）、structured（结构化分组）
+- 可选择是否使用表情符号
+- 自动检测并显示可用的元数据信息
+
 #### Console.log 输出格式
 
 **Simple 格式**：简洁的单行输出（默认）
 
-```md
-🚀 构建信息:
-  版本: 1.0.0
-  构建时间: 2025-01-27T10:30:00.000Z
-  Git 分支: main
-  Node 版本: v18.17.0
-```
-
-**Detailed 格式**：详细的分组输出
-
-```md
+```javascript
 🚀 构建信息
-📦 版本: 1.0.0
-⏰ 构建时间: 2025-01-27T10:30:00.000Z
-🔧 Git 信息:
-    分支: main
-    提交: abc1234
-    作者: Developer
-🟢 Node 版本: v18.17.0
+[release] 版本号 1.0.0
+[release] 构建时间 2025-01-27 10:30:00
+[release] Git 分支 main
+[release] Git 提交ID abc1234
+[release] Git 标签 v1.0.0
+[release] Node 版本 v18.17.0
 ```
 
-**Structured 格式**：结构化的分组输出
+**Detailed 格式**：详细的分组输出（使用 console.group）
 
-```md
+```javascript
 🚀 构建信息
-✅ 🚀 构建信息
-📦 版本: 1.0.0
-⏰ 构建时间: 2025-01-27T10:30:00.000Z
+[release] 版本号 1.0.0
+[release] 构建时间 2025-01-27 10:30:00
 
-🔧 Git 信息:
-    分支: main
-    提交: abc1234
-    作者: Developer
-🟢 Node 版本: v18.17.0
+⚙️ Git 信息
+  [release] 分支 main
+  [release] 提交ID abc1234
+  [release] 标签 v1.0.0
+
+[release] Node 版本: v18.17.0
+
+🌐 环境变量
+  [release] NODE_ENV: production
+  [release] VITE_APP_TITLE: My App
 ```
+
+**Structured 格式**：结构化的分组输出（使用 console.group）
+
+```javascript
+🚀 构建信息
+[release] 版本号 1.0.0
+[release] 构建时间 2025-01-27 10:30:00
+
+⚙️ Git 信息
+  [release] 分支 main
+  [release] 提交ID abc1234
+  [release] 标签 v1.0.0
+
+[release] Node 版本 v18.17.0
+
+🌐 环境变量
+  [release] NODE_ENV production
+  [release] VITE_APP_TITLE My App
+```
+
+**注意**：所有输出都使用彩色样式，`[release]` 标签有深色背景，值有绿色背景。
 
 ## 🧪 测试
 
 ```bash
+# 运行测试
 pnpm test
+
+# 运行测试并生成覆盖率报告
 pnpm run test:coverage
+
+# 类型检查
 pnpm run type-check
+
+# 代码检查
 pnpm run lint
+
+# 代码格式化
+pnpm run format
 ```
 
 ## 📝 开发
@@ -297,14 +334,20 @@ cd vite-plugin-release-info
 # 安装依赖
 pnpm install
 
-# 开发模式
+# 开发模式（监听文件变化）
 pnpm dev
 
-# 构建
+# 构建项目
 pnpm build
 
-# 运行示例
+# 运行示例项目
 pnpm example
+
+# 构建示例项目
+pnpm example:build
+
+# 清理构建文件
+pnpm clean
 ```
 
 ## 🚀 发布
@@ -318,9 +361,9 @@ git commit -m "fix: resolve bug"
 git commit -m "docs: update documentation"
 
 # 发布新版本
-pnpm bumpp:patch  # 补丁版本 (0.0.1 → 0.0.2)
-pnpm bumpp:minor  # 次要版本 (0.0.1 → 0.1.0)
-pnpm bumpp:major  # 主要版本 (0.0.1 → 1.0.0)
+pnpm bumpp:patch  # 补丁版本 (0.0.3 → 0.0.4)
+pnpm bumpp:minor  # 次要版本 (0.0.3 → 0.1.0)
+pnpm bumpp:major  # 主要版本 (0.0.3 → 1.0.0)
 ```
 
 ## 🤝 贡献
@@ -339,7 +382,7 @@ MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 如果你遇到问题或有建议，请：
 
-1. 查看 [Issues](https://github.com/yourusername/vite-plugin-release-info/issues)
+1. 查看 [Issues](https://github.com/lorainwings/vite-plugin-release-info/issues)
 2. 创建新的 Issue
 3. 联系维护者
 

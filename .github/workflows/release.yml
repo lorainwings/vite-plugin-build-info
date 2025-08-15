@@ -106,14 +106,15 @@ jobs:
             Please check [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for detailed updates.
 
             ### 🚀 Key Features
-            - Automatic build information injection
+            - Automatic release metadata injection
+            - Version information injection into index.html
             - Git information collection
-            - Environment variable support
+            - Build timestamp injection
             - Highly configurable options
 
             ### 📦 Installation
             ```bash
-            pnpm add vite-plugin-meta-inject
+            pnpm add vite-plugin-release-info
             ```
 
             ### 🔧 Usage
