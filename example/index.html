@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vite Plugin Release Info 示例</title>
+</head>
+
+<body>
+  <div id="app">
+    <h1>Vite Plugin Release Info 示例</h1>
+    <div id="build-info">
+      <h2>构建信息</h2>
+      <div id="metadata-display"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+  <script>
+    // 显示注入的构建信息
+    if (window.BUILD_INFO) {
+      const display = document.getElementById('metadata-display')
+      display.innerHTML = `
+        <pre>${JSON.stringify(window.BUILD_INFO, null, 2)}</pre>
+      `
+    }
+  </script>
+</body>
+
+</html>
