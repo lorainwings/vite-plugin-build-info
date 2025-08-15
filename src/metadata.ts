@@ -1,5 +1,7 @@
 import { simpleGit } from 'simple-git'
 import type { ReleaseInfoOptions, BuildMetadata } from './types'
+import { join } from 'path'
+import { readFileSync } from 'fs'
 
 interface GitBranch {
   current?: string
@@ -43,11 +45,13 @@ const getNodeVersion = (): string => process.version
 // 纯函数：获取版本信息
 const getVersionInfo = async (): Promise<string | undefined> => {
   try {
-    const pkg = await import('../package.json', { assert: { type: 'json' } })
-    const packageData = pkg as { default?: PackageJson } & PackageJson
-    return packageData.default?.version ?? packageData.version
+    const cwd = process.cwd()
+    const packagePath = join(cwd, 'package.json')
+    const packageContent = readFileSync(packagePath, 'utf-8')
+    const packageData: PackageJson = JSON.parse(packageContent)
+    return packageData.version
   } catch {
-    return undefined
+    return '_._._'
   }
 }
 
@@ -64,10 +68,38 @@ const getGitInfo = async (): Promise<BuildMetadata['git'] | undefined> => {
       git.tags().catch(() => ({ latest: undefined }) as GitTags)
     ])
 
+    const currentBranch = branch?.current
     const latestTag = tags?.latest
     const short = commit?.latest?.hash
       ? commit.latest.hash.slice(0, 7)
       : undefined
+
+    let releaseType: 'branch' | 'tag' | 'commit' = 'branch'
+    let release: string | undefined = currentBranch
+
+    try {
+      const currentRef = await git
+        .revparse(['--abbrev-ref', 'HEAD'])
+        .catch(() => '')
+      const isDetached = currentRef === 'HEAD'
+
+      if (isDetached) {
+        const tagAtHead = await git.tag(['--points-at', 'HEAD']).catch(() => '')
+        if (tagAtHead) {
+          releaseType = 'tag'
+          release = tagAtHead
+        } else {
+          releaseType = 'commit'
+          release = short
+        }
+      } else {
+        releaseType = 'branch'
+        release = currentBranch
+      }
+    } catch {
+      releaseType = 'branch'
+      release = currentBranch
+    }
 
     let commitTime: string | undefined
     if (commit?.latest?.date) {
@@ -80,7 +112,7 @@ const getGitInfo = async (): Promise<BuildMetadata['git'] | undefined> => {
     }
 
     return {
-      branch: branch?.current,
+      branch: currentBranch,
       commit: commit?.latest?.hash,
       commitHash: commit?.latest?.hash,
       commitMessage: commit?.latest?.message,
@@ -89,7 +121,9 @@ const getGitInfo = async (): Promise<BuildMetadata['git'] | undefined> => {
       remote: remote[0]?.refs?.fetch,
       tag: latestTag,
       short,
-      commitTime
+      commitTime,
+      releaseType,
+      release
     }
   } catch {
     return undefined

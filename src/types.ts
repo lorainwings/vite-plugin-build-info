@@ -125,6 +125,8 @@ export interface BuildMetadata {
     tag?: string
     short?: string
     commitTime?: string
+    releaseType?: 'branch' | 'tag' | 'commit'
+    release?: string
   }
   /** Node 版本 */
   nodeVersion: string

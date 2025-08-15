@@ -2,29 +2,40 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { generateMetadata } from '../src/metadata'
 
 // Mock simple-git
+const mockGit = {
+  branch: vi.fn(),
+  log: vi.fn(),
+  getRemotes: vi.fn(),
+  tags: vi.fn(),
+  revparse: vi.fn(),
+  tag: vi.fn()
+}
+
 vi.mock('simple-git', () => ({
-  simpleGit: vi.fn(() => ({
-    branch: vi.fn().mockResolvedValue({ current: 'main' }),
-    log: vi.fn().mockResolvedValue({
-      latest: {
-        hash: 'abc123',
-        message: 'test commit',
-        author_name: 'Test User',
-        author_email: 'test@example.com'
-      }
-    }),
-    getRemotes: vi
-      .fn()
-      .mockResolvedValue([
-        { refs: { fetch: 'https://github.com/test/repo.git' } }
-      ]),
-    tags: vi.fn().mockResolvedValue({ latest: 'v1.0.0' })
-  }))
+  simpleGit: vi.fn(() => mockGit)
 }))
 
 describe('generateMetadata', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+
+    // 默认模拟分支模式
+    mockGit.branch.mockResolvedValue({ current: 'main' })
+    mockGit.log.mockResolvedValue({
+      latest: {
+        hash: 'abc123',
+        message: 'test commit',
+        author_name: 'Test User',
+        author_email: 'test@example.com',
+        date: '2024-01-01T00:00:00Z'
+      }
+    })
+    mockGit.getRemotes.mockResolvedValue([
+      { refs: { fetch: 'https://github.com/test/repo.git' } }
+    ])
+    mockGit.tags.mockResolvedValue({ latest: 'v1.0.0' })
+    mockGit.revparse.mockResolvedValue('main')
+    mockGit.tag.mockResolvedValue('')
   })
 
   it('should generate basic metadata', async () => {
@@ -43,6 +54,28 @@ describe('generateMetadata', () => {
     expect(metadata.git?.branch).toBe('main')
     expect(metadata.git?.commit).toBe('abc123')
     expect(metadata.git?.author).toBe('Test User')
+    expect(metadata.git?.releaseType).toBe('branch')
+    expect(metadata.git?.release).toBe('main')
+  })
+
+  it('should detect tag-based release', async () => {
+    mockGit.revparse.mockResolvedValue('HEAD')
+    mockGit.tag.mockResolvedValue('v2.0.0')
+
+    const metadata = await generateMetadata({ includeGitInfo: true })
+
+    expect(metadata.git?.releaseType).toBe('tag')
+    expect(metadata.git?.release).toBe('v2.0.0')
+  })
+
+  it('should detect commit-based release', async () => {
+    mockGit.revparse.mockResolvedValue('HEAD')
+    mockGit.tag.mockResolvedValue('')
+
+    const metadata = await generateMetadata({ includeGitInfo: true })
+
+    expect(metadata.git?.releaseType).toBe('commit')
+    expect(metadata.git?.release).toBe('abc123')
   })
 
   it('should include custom fields', async () => {
