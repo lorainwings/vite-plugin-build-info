@@ -19,6 +19,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documentation updates...
 
+## [0.0.1] - 2025-08-17
+
+### ✨ Features
+
+- **Enhanced Git Information**: Added `releaseType` and `release` fields for better release tracking
+- **Improved Console.log Output**: Enhanced console.log injection with multiple formats and emoji support
+- **Better Type Definitions**: Updated TypeScript interfaces to include all available metadata fields
+
+### 🔧 Technical Improvements
+
+- **Release Detection**: Better detection of tag-based, branch-based, and commit-based releases
+- **Console.log Formats**: Added three console.log output formats: simple, detailed, and structured
+- **Enhanced Metadata**: More comprehensive Git information collection including commit time and author details
+
+### 📚 Documentation
+
+- Updated API documentation to reflect all available options
+- Added comprehensive console.log feature documentation
+- Updated type definitions in README
+
 ## [0.0.4] - 2025-08-15
 
 ### 🎉 Initial Release

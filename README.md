@@ -39,6 +39,7 @@
 - 📝 **TypeScript 支持**：完整的类型定义
 - 🧪 **测试覆盖**：完整的单元测试
 - 🎯 **Console.log 注入**：支持多种格式的控制台输出
+- 🏷️ **智能发布检测**：自动识别分支、标签或提交发布类型
 
 ## 📦 安装
 
@@ -147,9 +148,11 @@ interface BuildMetadata {
     author?: string          // 作者
     email?: string           // 作者邮箱
     remote?: string          // 远程仓库地址
-    tag?: string             // 最新标签
+    latestTag?: string       // 最新标签
     short?: string           // 短提交哈希（前7位）
     commitTime?: string      // 提交时间
+    releaseType?: 'branch' | 'tag' | 'commit'  // 发布类型
+    release?: string         // 发布标识（分支名、标签名或提交哈希）
   }
   nodeVersion: string        // Node.js 版本
   ci?: {                     // CI 信息
@@ -304,6 +307,31 @@ releaseInfo({
 ```
 
 **注意**：所有输出都使用彩色样式，`[release]` 标签有深色背景，值有绿色背景。
+
+### 🏷️ 智能发布检测
+
+插件现在支持智能检测发布类型，自动识别当前是基于分支、标签还是提交的发布：
+
+```typescript
+// 在注入的元数据中，Git 信息现在包含：
+git: {
+  // ... 其他 Git 信息
+  releaseType: 'branch' | 'tag' | 'commit',  // 发布类型
+  release: string,                            // 发布标识
+}
+```
+
+**发布类型说明**：
+
+- **`branch`**：当前在分支上（如 `main`、`develop`）
+- **`tag`**：当前在标签上（如 `v1.0.0`、`release-2024`）
+- **`commit`**：当前在分离的提交上（如 `abc1234`）
+
+**使用场景**：
+
+- 分支发布：适合开发分支或功能分支
+- 标签发布：适合版本发布和稳定版本
+- 提交发布：适合 CI/CD 中的特定提交构建
 
 ## 🧪 测试
 
