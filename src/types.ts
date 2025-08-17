@@ -104,6 +104,11 @@ export interface ReleaseInfoOptions {
    * @default false
    */
   injectInDev?: boolean
+
+  /**
+   * 暗水印配置
+   */
+  watermark?: WatermarkOptions
 }
 
 export interface BuildMetadata {
@@ -160,3 +165,118 @@ export interface ConsoleLogConfig {
   useEmojis: boolean
   metadata: BuildMetadata
 }
+
+/**
+ * 暗水印配置选项
+ */
+export interface WatermarkOptions {
+  /**
+   * 是否启用暗水印
+   * @default false
+   */
+  enabled?: boolean
+
+  /**
+   * 水印透明度 (0-1)
+   * @default 0.1
+   */
+  opacity?: number
+
+  /**
+   * 水印位置
+   * @default 'center'
+   */
+  position?:
+    | 'center'
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-left'
+    | 'bottom-right'
+
+  /**
+   * 水印大小
+   * @default 'cover'
+   */
+  size?: 'cover' | 'contain' | 'auto'
+
+  /**
+   * 水印层级
+   * @default 9999
+   */
+  zIndex?: number
+
+  /**
+   * 是否启用 DOM 监听
+   * @default true
+   */
+  enableMutationObserver?: boolean
+
+  /**
+   * 是否启用大小变化监听
+   * @default true
+   */
+  enableResizeObserver?: boolean
+
+  /**
+   * 自定义水印文本生成函数
+   */
+  customText?: (metadata: BuildMetadata) => string
+
+  /**
+   * 自定义样式
+   */
+  customStyle?: {
+    fontFamily?: string
+    fontSize?: string
+    color?: string
+    fontWeight?: string | number
+  }
+}
+
+/**
+ * 水印数据结构
+ */
+export interface WatermarkData {
+  /** 水印版本 */
+  version: string
+  /** 创建时间戳 */
+  timestamp: number
+  /** 构建元数据 */
+  metadata: BuildMetadata
+  /** 数据校验和 */
+  checksum: string
+}
+
+/**
+ * 水印错误类型
+ */
+export interface WatermarkError extends Error {
+  code:
+    | 'ENCODE_FAILED'
+    | 'DECODE_FAILED'
+    | 'VALIDATION_FAILED'
+    | 'INVALID_OPTIONS'
+  details?: unknown
+}
+
+/**
+ * 结果类型，用于错误处理
+ */
+export type Result<T, E = Error> =
+  | { success: true; data: T }
+  | { success: false; error: E }
+
+/**
+ * 图片处理选项
+ */
+export interface ProcessOptions {
+  /** 是否保持原始尺寸 */
+  preserveSize?: boolean
+  /** 输出格式 */
+  format?: 'png' | 'jpeg' | 'webp'
+  /** 质量设置 (0-1) */
+  quality?: number
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Any = any

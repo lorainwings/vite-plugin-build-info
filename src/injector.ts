@@ -451,3 +451,64 @@ export const injectIntoHtml = (
 
   return result
 }
+
+/**
+ * 注入水印脚本到 HTML
+ * @param html - HTML 内容
+ * @param options - 插件选项
+ * @returns 注入水印脚本后的 HTML
+ */
+export function injectWatermarkScript(
+  html: string,
+  options: ReleaseInfoOptions
+): string {
+  try {
+    const watermarkOptions = options.watermark
+    if (!watermarkOptions?.enabled) {
+      return html
+    }
+
+    // 生成水印配置脚本
+    const watermarkConfig = {
+      enabled: watermarkOptions.enabled,
+      opacity: watermarkOptions.opacity ?? 0.1,
+      position: watermarkOptions.position ?? 'center',
+      size: watermarkOptions.size ?? 'cover',
+      zIndex: watermarkOptions.zIndex ?? 9999,
+      enableMutationObserver: watermarkOptions.enableMutationObserver ?? true,
+      enableResizeObserver: watermarkOptions.enableResizeObserver ?? true,
+      customText: watermarkOptions.customText,
+      customStyle: watermarkOptions.customStyle
+    }
+
+    const configScript = `
+      <script>
+        window.__WATERMARK_CONFIG__ = ${JSON.stringify(watermarkConfig)};
+      </script>
+    `
+
+    // 注入水印脚本
+    const watermarkScript = `
+      <script src="/dist/watermark.js"></script>
+    `
+
+    // 在 head 标签中注入
+    if (html.includes('</head>')) {
+      return html.replace('</head>', `${configScript}${watermarkScript}</head>`)
+    }
+
+    // 如果没有 head 标签，在 body 开始处注入
+    if (html.includes('<body')) {
+      return html.replace('<body', `<body>${configScript}${watermarkScript}`)
+    }
+
+    // 最后的选择，在 HTML 末尾注入
+    return html + configScript + watermarkScript
+  } catch (error) {
+    console.warn(
+      '[vite-plugin-release-info] Failed to inject watermark script:',
+      error
+    )
+    return html
+  }
+}

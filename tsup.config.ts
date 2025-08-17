@@ -1,13 +1,19 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['cjs', 'esm'],
+  entry: {
+    index: 'src/index.ts',
+    watermark: 'src/watermark/standalone.ts'
+  },
+  format: ['esm', 'cjs'],
   dts: true,
+  clean: true,
   splitting: false,
   sourcemap: true,
-  clean: true,
+  minify: true,
   treeshake: true,
-  minify: false,
-  external: ['vite']
+  external: ['vite'],
+  noExternal: ['simple-git'],
+  outDir: 'dist',
+  onSuccess: 'node scripts/post-build.js'
 })

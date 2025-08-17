@@ -20,11 +20,11 @@
 </p>
 
 <p align="center">
-  <strong>🚀 一个强大的 Vite 插件，用于在构建过程中向 <code>index.html</code> 注入构建元数据和版本信息 🚀</strong>
+  <strong>🚀 一个强大的 Vite 插件，用于在构建过程中向 <code>index.html</code> 注入构建元数据和暗水印功能 🚀</strong>
 </p>
 
 <p align="center">
-  <em>让您的应用构建信息更加透明和可追踪</em>
+  <em>让您的应用构建信息更加透明和可追踪，同时提供强大的版权保护</em>
 </p>
 
 ---
@@ -32,6 +32,7 @@
 ## ✨ 特性
 
 - 🚀 **自动注入构建信息**：构建时间、版本号、Git 信息等
+- 🔒 **暗水印保护**：像素级 RGBA 暗水印，保护应用版权
 - 🔧 **高度可配置**：支持自定义字段和注入位置
 - 📦 **多种输出格式**：JSON、HTML 注释、Meta 标签、Console.log
 - 🌍 **环境信息收集**：Node.js 版本、环境变量等
@@ -63,7 +64,49 @@ export default defineConfig({
 })
 ```
 
+### 启用暗水印
+
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite'
+import releaseInfo from 'vite-plugin-release-info'
+
+export default defineConfig({
+  plugins: [
+    releaseInfo({
+      watermark: {
+        enabled: true,
+        opacity: 0.1,
+        position: 'center'
+      }
+    })
+  ]
+})
+```
+
 **注意**：插件默认只在生产构建时注入元数据。如需在开发模式下也注入，请设置 `injectInDev: true`。
+
+## 🔧 配置选项
+
+### 基础配置
+
+| 选项 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `includeBuildTime` | `boolean` | `true` | 是否包含构建时间 |
+| `includeVersion` | `boolean` | `true` | 是否包含构建版本号 |
+| `includeGitInfo` | `boolean` | `true` | 是否包含 Git 信息 |
+| `includeNodeVersion` | `boolean` | `true` | 是否包含 Node.js 版本 |
+| `includeEnvInfo` | `boolean` | `false` | 是否包含环境变量信息 |
+
+### 暗水印配置
+
+| 选项 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `watermark.enabled` | `boolean` | `false` | 是否启用暗水印 |
+| `watermark.opacity` | `number` | `0.1` | 水印透明度 (0-1) |
+| `watermark.position` | `string` | `'center'` | 水印位置 |
+| `watermark.size` | `string` | `'cover'` | 水印大小 |
+| `watermark.zIndex` | `number` | `9999` | 水印层级 |
 
 ### 高级配置
 
@@ -82,277 +125,95 @@ export default defineConfig({
       includeNodeVersion: true,
       includeEnvInfo: true,
 
+      // 环境变量配置
+      envPrefixes: ['NODE_ENV', 'VITE_', 'JENKINS_', 'CI_'],
+
+      // 注入配置
+      injectPosition: 'head',
+      generateJson: true,
+      generateComments: true,
+      generateMetaTags: true,
+      generateConsoleLog: true,
+      consoleLogFormat: 'detailed',
+      consoleLogEmojis: true,
+      variableName: '__BUILD_META__',
+
+      // 暗水印高级配置
+      watermark: {
+        enabled: true,
+        opacity: 0.05,
+        position: 'center',
+        size: 'cover',
+        zIndex: 9999,
+        enableMutationObserver: true,
+        enableResizeObserver: true,
+        customText: (metadata) => `${metadata.version} - ${metadata.buildTime}`,
+        customStyle: {
+          fontFamily: 'Arial, sans-serif',
+          fontSize: '14px',
+          color: '#000000'
+        }
+      },
+
       // 自定义字段
       customFields: {
         buildId: () => `build-${Date.now()}`,
         environment: () => process.env.NODE_ENV || 'development',
         deployTime: () => new Date().toLocaleString(),
         randomValue: () => Math.random().toString(36).substring(7),
-      },
-
-      // 注入配置
-      injectPosition: 'head',
-      generateJson: false,
-      generateComments: true,
-      generateMetaTags: true,
-      variableName: '__BUILD_META__',
-
-      // Console.log 注入配置
-      generateConsoleLog: true,
-      consoleLogFormat: 'simple', // 'simple' | 'detailed' | 'structured'
-      consoleLogEmojis: true,
-
-      // 环境变量前缀
-      envPrefixes: ['NODE_ENV', 'VITE_', 'JENKINS_', 'CI_'],
+        userAgent: () => navigator.userAgent,
+        screenResolution: () => `${screen.width}x${screen.height}`,
+        timezone: () => Intl.DateTimeFormat().resolvedOptions().timeZone
+      }
     })
   ]
 })
 ```
 
-## 📖 API 文档
+## 🔍 暗水印解析
 
-### ReleaseInfoOptions
+访问 [暗水印解析器](https://lorainwings.github.io/vite-plugin-release-info/) 来解析应用中的暗水印信息。
 
-| 选项 | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| `customFields` | `Record<string, string \| number \| boolean \| (() => string \| number \| boolean \| Promise<string \| number \| boolean>)>` | `{}` | 自定义元数据字段 |
-| `includeBuildTime` | `boolean` | `true` | 是否包含构建时间 |
-| `includeVersion` | `boolean` | `true` | 是否包含构建版本号 |
-| `includeGitInfo` | `boolean` | `true` | 是否包含 Git 信息 |
-| `includeNodeVersion` | `boolean` | `true` | 是否包含 Node.js 版本 |
-| `includeEnvInfo` | `boolean` | `false` | 是否包含环境变量信息 |
-| `envPrefixes` | `string[]` | `['NODE_ENV', 'VITE_', 'JENKINS_', 'CI_']` | 要包含的环境变量前缀 |
-| `injectPosition` | `'head' \| 'body' \| 'custom'` | `'head'` | 注入位置 |
-| `customSelector` | `string` | - | 自定义注入选择器（当 injectPosition 为 'custom' 时使用） |
-| `generateJson` | `boolean` | `false` | 是否生成 JSON 格式的元数据 |
-| `generateComments` | `boolean` | `true` | 是否生成注释格式的元数据 |
-| `generateMetaTags` | `boolean` | `true` | 是否生成 meta 标签 |
-| `generateConsoleLog` | `boolean` | `false` | 是否生成 console.log 输出 |
-| `consoleLogFormat` | `'structured' \| 'simple' \| 'detailed'` | `'simple'` | console.log 输出格式 |
-| `consoleLogEmojis` | `boolean` | `true` | 是否在 console.log 中使用表情符号 |
-| `variableName` | `string` | `'__BUILD_META__'` | 元数据变量名（用于在 HTML 中访问） |
-| `injectInDev` | `boolean` | `false` | 是否在开发模式下也注入（仅用于调试） |
+### 技术原理
 
-### 注入的元数据结构
+暗水印使用 LSB (Least Significant Bit) 技术，将水印数据嵌入到图片的 Alpha 通道中：
 
-```typescript
-interface BuildMetadata {
-  buildTime: string           // 本地化格式的构建时间
-  buildTimestamp: number      // 构建时间戳（毫秒）
-  version?: string           // 版本号（来自 package.json）
-  git?: {                    // Git 信息
-    branch?: string          // 当前分支
-    commit?: string          // 提交哈希
-    commitHash?: string      // 提交哈希（别名）
-    commitMessage?: string   // 提交信息
-    author?: string          // 作者
-    email?: string           // 作者邮箱
-    remote?: string          // 远程仓库地址
-    latestTag?: string       // 最新标签
-    short?: string           // 短提交哈希（前7位）
-    commitTime?: string      // 提交时间
-    releaseType?: 'branch' | 'tag' | 'commit'  // 发布类型
-    release?: string         // 发布标识（分支名、标签名或提交哈希）
-  }
-  nodeVersion: string        // Node.js 版本
-  ci?: {                     // CI 信息
-    jenkinsNodeName?: string // Jenkins 节点名
-    jenkinsExecutorNumber?: string // Jenkins 执行器编号
-    jenkinsBuildNumber?: string   // Jenkins 构建号
-    jenkinsJobName?: string       // Jenkins 任务名
-    githubRunId?: string          // GitHub Actions 运行 ID
-    githubRunNumber?: string      // GitHub Actions 运行编号
-    provider?: string             // CI 提供商名称
-    containerId?: string          // CI 容器标识
-  }
-  env?: Record<string, string> // 环境变量
-  custom?: Record<string, string | number | boolean> // 自定义字段
-}
-```
+1. **编码过程**：将元数据编码为二进制流，嵌入到像素的 Alpha 通道最低位
+2. **解码过程**：从 Alpha 通道提取最低位，重建原始数据
+3. **数据验证**：使用校验和确保数据完整性
 
-## 🎯 使用示例
+### 特点
 
-### 1. 基础用法
+- 🔒 **不可见性**：水印完全不可见，不影响视觉效果
+- 🛡️ **抗干扰性**：对图片压缩、格式转换有一定抵抗力
+- 📊 **数据完整性**：包含校验和验证，确保数据准确
+- 🚀 **高性能**：本地处理，无需网络请求
 
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <!-- 插件会自动注入构建信息 -->
-</head>
-<body>
-  <script>
-    // 访问注入的构建信息
-    console.log(window.__BUILD_META__)
+## 📚 更多示例
 
-    // 或者如果配置了自定义变量名
-    // console.log(window.BUILD_INFO)
-  </script>
-</body>
-</html>
-```
-
-### 2. 自定义字段
-
-```typescript
-releaseInfo({
-  customFields: {
-    // 静态值
-    projectName: 'My Awesome Project',
-
-    // 动态值
-    buildId: () => `build-${Date.now()}`,
-
-    // 异步值
-    apiVersion: async () => {
-      const response = await fetch('/api/version')
-      return response.text()
-    }
-  }
-})
-```
-
-### 3. 环境变量收集
-
-```typescript
-releaseInfo({
-  includeEnvInfo: true,
-  envPrefixes: ['NODE_ENV', 'VITE_', 'JENKINS_', 'CI_']
-})
-```
-
-### 4. 自定义注入位置
-
-```typescript
-releaseInfo({
-  injectPosition: 'custom',
-  customSelector: '#build-info'
-})
-```
-
-### 5. Console.log 注入
-
-```typescript
-releaseInfo({
-  // 启用 console.log 注入
-  generateConsoleLog: true,
-
-  // 选择输出格式
-  consoleLogFormat: 'simple', // 'simple' | 'detailed' | 'structured'
-
-  // 是否使用表情符号
-  consoleLogEmojis: true,
-
-  // 其他配置...
-})
-```
-
-**Console.log 特性**：
-
-- 使用彩色样式输出，标签有深色背景，值有绿色背景
-- 支持三种输出格式：simple（单行）、detailed（分组）、structured（结构化分组）
-- 可选择是否使用表情符号
-- 自动检测并显示可用的元数据信息
-
-#### Console.log 输出格式
-
-**Simple 格式**：简洁的单行输出（默认）
-
-```javascript
-🚀 构建信息
-[release] 版本号 1.0.0
-[release] 构建时间 2025-01-27 10:30:00
-[release] Git 分支 main
-[release] Git 提交ID abc1234
-[release] Git 标签 v1.0.0
-[release] Node 版本 v18.17.0
-```
-
-**Detailed 格式**：详细的分组输出（使用 console.group）
-
-```javascript
-🚀 构建信息
-[release] 版本号 1.0.0
-[release] 构建时间 2025-01-27 10:30:00
-
-⚙️ Git 信息
-  [release] 分支 main
-  [release] 提交ID abc1234
-  [release] 标签 v1.0.0
-
-[release] Node 版本: v18.17.0
-
-🌐 环境变量
-  [release] NODE_ENV: production
-  [release] VITE_APP_TITLE: My App
-```
-
-**Structured 格式**：结构化的分组输出（使用 console.group）
-
-```javascript
-🚀 构建信息
-[release] 版本号 1.0.0
-[release] 构建时间 2025-01-27 10:30:00
-
-⚙️ Git 信息
-  [release] 分支 main
-  [release] 提交ID abc1234
-  [release] 标签 v1.0.0
-
-[release] Node 版本 v18.17.0
-
-🌐 环境变量
-  [release] NODE_ENV production
-  [release] VITE_APP_TITLE My App
-```
-
-**注意**：所有输出都使用彩色样式，`[release]` 标签有深色背景，值有绿色背景。
-
-### 🏷️ 智能发布检测
-
-插件现在支持智能检测发布类型，自动识别当前是基于分支、标签还是提交的发布：
-
-```typescript
-// 在注入的元数据中，Git 信息现在包含：
-git: {
-  // ... 其他 Git 信息
-  releaseType: 'branch' | 'tag' | 'commit',  // 发布类型
-  release: string,                            // 发布标识
-}
-```
-
-**发布类型说明**：
-
-- **`branch`**：当前在分支上（如 `main`、`develop`）
-- **`tag`**：当前在标签上（如 `v1.0.0`、`release-2024`）
-- **`commit`**：当前在分离的提交上（如 `abc1234`）
-
-**使用场景**：
-
-- 分支发布：适合开发分支或功能分支
-- 标签发布：适合版本发布和稳定版本
-- 提交发布：适合 CI/CD 中的特定提交构建
+查看 [example/](example/) 目录获取更多使用示例。
 
 ## 🧪 测试
 
 ```bash
-# 运行测试
+# 运行所有测试
 pnpm test
 
-# 运行测试并生成覆盖率报告
-pnpm run test:coverage
+# 运行测试覆盖率
+pnpm test:coverage
 
-# 类型检查
-pnpm run type-check
+# 运行集成测试
+pnpm test:integration
 
-# 代码检查
-pnpm run lint
-
-# 代码格式化
-pnpm run format
+# 运行性能测试
+pnpm test:performance
 ```
 
-## 📝 开发
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+### 开发环境设置
 
 ```bash
 # 克隆仓库
@@ -362,58 +223,13 @@ cd vite-plugin-release-info
 # 安装依赖
 pnpm install
 
-# 开发模式（监听文件变化）
+# 开发模式
 pnpm dev
 
-# 构建项目
-pnpm build
-
-# 运行示例项目
+# 运行示例
 pnpm example
-
-# 构建示例项目
-pnpm example:build
-
-# 清理构建文件
-pnpm clean
 ```
 
-## 🚀 发布
+## 许可证
 
-项目使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范自动生成 changelog。
-
-```bash
-# 提交代码时使用规范格式
-git commit -m "feat: add new feature"
-git commit -m "fix: resolve bug"
-git commit -m "docs: update documentation"
-
-# 发布新版本
-pnpm bumpp:patch  # 补丁版本 (0.0.3 → 0.0.4)
-pnpm bumpp:minor  # 次要版本 (0.0.3 → 0.1.0)
-pnpm bumpp:major  # 主要版本 (0.0.3 → 1.0.0)
-```
-
-## 🤝 贡献
-
-欢迎贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
-
-## 📄 许可证
-
-MIT License - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 🙏 致谢
-
-感谢所有为这个项目做出贡献的开发者！
-
-## 📞 支持
-
-如果你遇到问题或有建议，请：
-
-1. 查看 [Issues](https://github.com/lorainwings/vite-plugin-release-info/issues)
-2. 创建新的 Issue
-3. 联系维护者
-
----
-
-⭐ 如果这个项目对你有帮助，请给它一个星标！
+MIT License

@@ -1,0 +1,99 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.14.0
+
+      - name: 💾 Configure pnpm cache
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: 🔄 Setup cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔨 Build project
+        run: pnpm run build
+
+      - name: 📝 Copy documentation
+        run: |
+          # 确保 docs 目录存在
+          mkdir -p docs
+
+          # 复制水印解析页面
+          cp docs/watermark-decoder.html docs/index.html
+
+          # 创建简单的 README
+          cat > docs/README.md << 'EOF'
+          # vite-plugin-release-info Documentation
+
+          ## 暗水印解析器
+
+          访问 [暗水印解析器](./watermark-decoder.html) 来解析应用中的暗水印信息。
+
+          ## 功能特性
+
+          - 🔒 像素级 RGBA 暗水印
+          - 📊 完整元数据解析
+          - ✅ 数据完整性验证
+          - 🚀 本地解析，保护隐私
+
+          ## 使用方法
+
+          1. 上传包含暗水印的图片
+          2. 系统自动检测并解析水印
+          3. 显示完整的构建元数据信息
+
+          ## 支持格式
+
+          - PNG (推荐，支持 Alpha 通道)
+          - JPG/JPEG
+
+          ## 技术原理
+
+          使用 LSB (Least Significant Bit) 技术，将水印数据嵌入到图片的 Alpha 通道中，
+          通过修改像素的最低有效位来存储信息，实现不可见的水印效果。
+          EOF
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'docs: update documentation'
