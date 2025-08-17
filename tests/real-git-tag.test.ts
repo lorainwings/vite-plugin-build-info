@@ -236,7 +236,7 @@ describe('真实Git Tag发布场景测试', () => {
         git: {
           releaseType: 'tag',
           release: 'v5.0.0',
-          tag: 'v5.0.0',
+          latestTag: 'v5.0.0',
           commit: '89012345678901234567890abcdef12345',
           commitHash: '89012345678901234567890abcdef12345',
           short: '8901234',

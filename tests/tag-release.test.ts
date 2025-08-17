@@ -43,7 +43,7 @@ describe('Tag发布测试', () => {
 
       expect(metadata.git?.releaseType).toBe('tag')
       expect(metadata.git?.release).toBe('v1.0.0')
-      expect(metadata.git?.tag).toBe('v2.1.0')
+      expect(metadata.git?.latestTag).toBe('v2.1.0')
       expect(metadata.git?.commit).toBe('def456789abcdef')
       expect(metadata.git?.short).toBe('def4567')
     })
@@ -106,7 +106,7 @@ describe('Tag发布测试', () => {
       expect(metadata.git).toMatchObject({
         releaseType: 'tag',
         release: 'v2.1.0',
-        tag: 'v2.1.0',
+        latestTag: 'v2.1.0',
         commit: 'def456789abcdef',
         commitHash: 'def456789abcdef',
         short: 'def4567',

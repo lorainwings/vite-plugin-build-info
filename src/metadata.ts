@@ -119,7 +119,7 @@ const getGitInfo = async (): Promise<BuildMetadata['git'] | undefined> => {
       author: commit?.latest?.author_name,
       email: commit?.latest?.author_email,
       remote: remote[0]?.refs?.fetch,
-      tag: latestTag,
+      latestTag,
       short,
       commitTime,
       releaseType,

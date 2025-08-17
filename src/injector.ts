@@ -33,7 +33,8 @@ const generateMetadataComments = (metadata: BuildMetadata): string => {
       lines.push(`<!-- Git Commit Time: ${metadata.git.commitTime} -->`)
     if (metadata.git.author)
       lines.push(`<!-- Git Author: ${metadata.git.author} -->`)
-    if (metadata.git.tag) lines.push(`<!-- Git Tag: ${metadata.git.tag} -->`)
+    if (metadata.git.latestTag)
+      lines.push(`<!-- Git Latest Tag: ${metadata.git.latestTag} -->`)
   }
 
   lines.push(`<!-- Node Version: ${metadata.nodeVersion} -->`)
@@ -82,8 +83,10 @@ const generateMetaTagsHtml = (metadata: BuildMetadata): string => {
     if (metadata.git.author) {
       tags.push(`<meta name="git-author" content="${metadata.git.author}">`)
     }
-    if (metadata.git.tag) {
-      tags.push(`<meta name="git-tag" content="${metadata.git.tag}">`)
+    if (metadata.git.latestTag) {
+      tags.push(
+        `<meta name="git-latest-tag" content="${metadata.git.latestTag}">`
+      )
     }
   }
 
@@ -163,9 +166,9 @@ const generateSimpleConsoleLog = (
         `  console.log('%c[release] Git 提交时间%c ${metadata.git.commitTime}', 'background: #34495e; color: #ffffff; padding: 5px;', 'background: #42b983; padding:5px; color: #ffffff;');`
       )
     }
-    if (metadata.git.tag) {
+    if (metadata.git.latestTag) {
       lines.push(
-        `  console.log('%c[release] Git 标签%c ${metadata.git.tag}', 'background: #34495e; color: #ffffff; padding: 5px;', 'background: #42b983; padding:5px; color: #ffffff;');`
+        `  console.log('%c[release] Git 最新标签%c ${metadata.git.latestTag}', 'background: #34495e; color: #ffffff; padding: 5px;', 'background: #42b983; padding:5px; color: #ffffff;');`
       )
     }
     if (metadata.git.author) {
@@ -219,9 +222,9 @@ const generateDetailedConsoleLog = (
         `    console.log('%c[release] 提交时间%c ${metadata.git.commitTime}', 'background: #34495e; color: #ffffff; padding: 5px;', 'background: #42b983; padding:5px; color: #ffffff;');`
       )
     }
-    if (metadata.git.tag) {
+    if (metadata.git.latestTag) {
       lines.push(
-        `    console.log('%c[release] 标签%c ${metadata.git.tag}', 'background: #34495e; color: #ffffff; padding: 5px;', 'background: #42b983; padding:5px; color: #ffffff;');`
+        `    console.log('%c[release] 最新标签%c ${metadata.git.latestTag}', 'background: #34495e; color: #ffffff; padding: 5px;', 'background: #42b983; padding:5px; color: #ffffff;');`
       )
     }
     if (metadata.git.author) {
@@ -293,9 +296,9 @@ const generateStructuredConsoleLog = (
         `    console.log('%c[release] 提交时间%c ${metadata.git.commitTime}', 'background: #34495e; color: #ffffff; padding: 5px;', 'background: #42b983; padding:5px; color: #ffffff;');`
       )
     }
-    if (metadata.git.tag) {
+    if (metadata.git.latestTag) {
       lines.push(
-        `    console.log('%c[release] 标签%c ${metadata.git.tag}', 'background: #34495e; color: #ffffff; padding: 5px;', 'background: #42b983; padding:5px; color: #ffffff;');`
+        `    console.log('%c[release] 最新标签%c ${metadata.git.latestTag}', 'background: #34495e; color: #ffffff; padding: 5px;', 'background: #42b983; padding:5px; color: #ffffff;');`
       )
     }
     if (metadata.git.author) {

@@ -122,7 +122,7 @@ export interface BuildMetadata {
     author?: string
     email?: string
     remote?: string
-    tag?: string
+    latestTag?: string
     short?: string
     commitTime?: string
     releaseType?: 'branch' | 'tag' | 'commit'
