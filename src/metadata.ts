@@ -39,8 +39,35 @@ const getBuildTimeInfo = (): { buildTime: string; buildTimestamp: number } => {
   }
 }
 
-// 纯函数：获取 Node.js 版本
 const getNodeVersion = (): string => process.version
+
+const sanitizeBranchName = (name?: string): string | undefined => {
+  if (!name) return undefined
+  return name
+    .replace(/^refs\/heads\//, '')
+    .replace(/^refs\/remotes\/origin\//, '')
+    .replace(/^origin\//, '')
+}
+
+const getBranchFromEnv = (): string | undefined => {
+  const candidates = [
+    process.env.BRANCH_NAME, // Jenkins Multibranch
+    process.env.GIT_LOCAL_BRANCH, // Jenkins Git plugin
+    process.env.GIT_BRANCH, // Jenkins（可能为 origin/xxx）
+    process.env.CHANGE_BRANCH, // Jenkins PR 分支
+    process.env.GITHUB_HEAD_REF, // GitHub Actions PR
+    process.env.GITHUB_REF_NAME, // GitHub Actions 分支/标签短名
+    process.env.CI_COMMIT_REF_NAME, // GitLab CI 分支/标签名
+    process.env.CI_COMMIT_BRANCH, // GitLab CI 分支名
+    process.env.CI_BRANCH // 通用 CI
+  ]
+
+  for (const raw of candidates) {
+    const sanitized = sanitizeBranchName(raw)
+    if (sanitized) return sanitized
+  }
+  return undefined
+}
 
 // 纯函数：获取版本信息
 const getVersionInfo = async (): Promise<string | undefined> => {
@@ -68,7 +95,14 @@ const getGitInfo = async (): Promise<BuildMetadata['git'] | undefined> => {
       git.tags().catch(() => ({ latest: undefined }) as GitTags)
     ])
 
-    const currentBranch = branch?.current
+    const envBranch = getBranchFromEnv()
+    let currentBranch = envBranch ?? branch?.current
+    if (currentBranch && /(detached|HEAD|头指针分离)/i.test(currentBranch)) {
+      currentBranch = envBranch ?? undefined
+    }
+
+    currentBranch = sanitizeBranchName(currentBranch)
+
     const latestTag = tags?.latest
     const short = commit?.latest?.hash
       ? commit.latest.hash.slice(0, 7)
@@ -220,7 +254,9 @@ const processCustomFields = async (
       }
     } catch (error) {
       console.warn(
-        `[@hhfe/vite-plugin-release-info] Failed to get custom field "${key}":`,
+        '[@hhfe/vite-plugin-release-info] Failed to get custom field "' +
+          key +
+          '":',
         error
       )
     }
