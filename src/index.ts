@@ -1,11 +1,11 @@
 import type { IndexHtmlTransformContext } from 'vite'
 import { generateMetadata } from './metadata'
 import { injectIntoHtml } from './injector'
-import type { ReleaseInfoOptions } from './types'
+import type { Any, ReleaseInfoOptions } from './types'
 
 export * from './types'
 
-export default function releaseInfo(options: ReleaseInfoOptions = {}): any {
+export default function releaseInfo(options: ReleaseInfoOptions = {}): Any {
   const pluginName = 'vite-plugin-release-info'
 
   return {
