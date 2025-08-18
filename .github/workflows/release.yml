@@ -114,7 +114,7 @@ jobs:
 
             ### 📦 Installation
             ```bash
-            pnpm add vite-plugin-release-info
+            pnpm add @hhfe/vite-plugin-release-info
             ```
 
             ### 🔧 Usage

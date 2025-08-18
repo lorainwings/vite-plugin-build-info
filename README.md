@@ -2,13 +2,13 @@
   <img src="./favicon.ico" alt="Vite Plugin Release Info Banner" width="280" />
 </p>
 
-<h1 align="center"><b>vite-plugin-release-info</b></h1>
+<h1 align="center"><b>@hhfe/vite-plugin-release-info</b></h1>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/vite-plugin-release-info"><img src="https://img.shields.io/npm/v/vite-plugin-release-info?color=42b883&label=Npm&logo=npm" alt="Npm"></a>
-  <a href="https://www.npmjs.com/package/vite-plugin-release-info"><img src="https://img.shields.io/npm/dt/vite-plugin-release-info?label=Downloads&logo=npm" alt="Downloads"></a>
+  <a href="https://www.npmjs.com/package/@hhfe/vite-plugin-release-info"><img src="https://img.shields.io/npm/v/@hhfe/vite-plugin-release-info?color=42b883&label=Npm&logo=npm" alt="Npm"></a>
+  <a href="https://www.npmjs.com/package/@hhfe/vite-plugin-release-info"><img src="https://img.shields.io/npm/dy/@hhfe/vite-plugin-release-info?label=Downloads&logo=npm" alt="Downloads"></a>
   <a href="https://github.com/lorainwings/vite-plugin-release-info/blob/main/LICENSE"><img src="https://img.shields.io/github/license/lorainwings/vite-plugin-release-info?color=blue&label=License&logo=open-source-initiative" alt="License"></a>
-  <a href="https://github.com/lorainwings/vite-plugin-release-info/actions"><img src="https://img.shields.io/github/actions/workflow/status/lorainwings/vite-plugin-release-info/ci.yml?branch=main&label=CI&logo=github" alt="CI"></a>
+  <a href="https://github.com/lorainwings/vite-plugin-release-info/actions"><img src="https://img.shields.io/github/actions/workflow/status/lorainwings/vite-plugin-release-info/test-and-build.yml?branch=main&label=test-and-build&logo=github" alt="test-and-build"></a>
   <img src="https://img.shields.io/badge/Vite-5.4-646cff?logo=vite&logoColor=white" alt="Vite">
   <img src="https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white" alt="Node.js">
@@ -44,7 +44,7 @@
 ## 📦 安装
 
 ```bash
-pnpm add vite-plugin-release-info
+pnpm add @hhfe/vite-plugin-release-info
 ```
 
 ## 🚀 快速开始
@@ -54,7 +54,7 @@ pnpm add vite-plugin-release-info
 ```typescript
 // vite.config.ts
 import { defineConfig } from 'vite'
-import releaseInfo from 'vite-plugin-release-info'
+import releaseInfo from '@hhfe/vite-plugin-release-info'
 
 export default defineConfig({
   plugins: [
@@ -70,7 +70,7 @@ export default defineConfig({
 ```typescript
 // vite.config.ts
 import { defineConfig } from 'vite'
-import releaseInfo from 'vite-plugin-release-info'
+import releaseInfo from '@hhfe/vite-plugin-release-info'
 
 export default defineConfig({
   plugins: [
