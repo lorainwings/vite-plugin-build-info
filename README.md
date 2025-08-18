@@ -6,9 +6,9 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@hhfe/vite-plugin-release-info"><img src="https://img.shields.io/npm/v/@hhfe/vite-plugin-release-info?color=42b883&label=Npm&logo=npm" alt="Npm"></a>
-  <a href="https://www.npmjs.com/package/@hhfe/vite-plugin-release-info"><img src="https://img.shields.io/npm/dt/@hhfe/vite-plugin-release-info?label=Downloads&logo=npm" alt="Downloads"></a>
+  <a href="https://www.npmjs.com/package/@hhfe/vite-plugin-release-info"><img src="https://img.shields.io/npm/dy/@hhfe/vite-plugin-release-info?label=Downloads&logo=npm" alt="Downloads"></a>
   <a href="https://github.com/lorainwings/vite-plugin-release-info/blob/main/LICENSE"><img src="https://img.shields.io/github/license/lorainwings/vite-plugin-release-info?color=blue&label=License&logo=open-source-initiative" alt="License"></a>
-  <a href="https://github.com/lorainwings/vite-plugin-release-info/actions"><img src="https://img.shields.io/github/actions/workflow/status/lorainwings/vite-plugin-release-info/ci.yml?branch=main&label=CI&logo=github" alt="CI"></a>
+  <a href="https://github.com/lorainwings/vite-plugin-release-info/actions"><img src="https://img.shields.io/github/actions/workflow/status/lorainwings/vite-plugin-release-info/test-and-build.yml?branch=main&label=test-and-build&logo=github" alt="test-and-build"></a>
   <img src="https://img.shields.io/badge/Vite-5.4-646cff?logo=vite&logoColor=white" alt="Vite">
   <img src="https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white" alt="Node.js">
