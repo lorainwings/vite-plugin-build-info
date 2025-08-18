@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎉 Initial Release
 
-This is the first official release of the `vite-plugin-release-info` plugin, providing complete build metadata injection functionality.
+This is the first official release of the `@hhfe/vite-plugin-release-info` plugin, providing complete build metadata injection functionality.
 
 ### ✨ Features
 
@@ -91,7 +91,7 @@ This is the first official release of the `vite-plugin-release-info` plugin, pro
 
 ### 📦 Package Information
 
-- **Package Name**: `vite-plugin-release-info`
+- **Package Name**: `@hhfe/vite-plugin-release-info`
 - **Version**: 0.0.3
 - **License**: MIT
 - **Node.js Requirement**: >= 18.0.0
@@ -102,7 +102,7 @@ This is the first official release of the `vite-plugin-release-info` plugin, pro
 #### Basic Installation
 
 ```bash
-pnpm add vite-plugin-release-info
+pnpm add @hhfe/vite-plugin-release-info
 ```
 
 #### Basic Configuration
@@ -110,7 +110,7 @@ pnpm add vite-plugin-release-info
 ```typescript
 // vite.config.ts
 import { defineConfig } from 'vite'
-import releaseInfo from 'vite-plugin-release-info'
+import releaseInfo from '@hhfe/vite-plugin-release-info'
 
 export default defineConfig({
   plugins: [
@@ -138,7 +138,7 @@ releaseInfo({
 ### 📁 Project Structure
 
 ```
-vite-plugin-release-info/
+@hhfe/vite-plugin-release-info/
 ├── src/
 │   ├── index.ts          # Plugin entry
 │   ├── injector.ts       # Injection logic
@@ -174,7 +174,7 @@ pnpm example:build # Build example project
 ### 🔗 Related Links
 
 - **GitHub Repository**: <https://github.com/lorainwings/vite-plugin-release-info>
-- **NPM Package**: <https://www.npmjs.com/package/vite-plugin-release-info>
+- **NPM Package**: <https://www.npmjs.com/package/@hhfe/vite-plugin-release-info>
 - **Issue Feedback**: <https://github.com/lorainwings/vite-plugin-release-info/issues>
 - **License**: MIT License
 

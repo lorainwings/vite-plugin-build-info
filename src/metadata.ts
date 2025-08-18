@@ -220,7 +220,7 @@ const processCustomFields = async (
       }
     } catch (error) {
       console.warn(
-        `[vite-plugin-release-info] Failed to get custom field "${key}":`,
+        `[@hhfe/vite-plugin-release-info] Failed to get custom field "${key}":`,
         error
       )
     }
