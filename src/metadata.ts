@@ -103,11 +103,34 @@ const getGitInfo = async (): Promise<BuildMetadata['git'] | undefined> => {
 
     let commitTime: string | undefined
     if (commit?.latest?.date) {
+      const parsed = new Date(commit.latest.date)
+      if (!Number.isNaN(parsed.getTime())) {
+        commitTime = parsed.toLocaleString()
+      }
+    }
+
+    if (!commitTime) {
       try {
-        const date = new Date(commit.latest.date)
-        commitTime = date.toLocaleString()
+        const fallback = (
+          await git
+            .raw([
+              'log',
+              '-1',
+              '--format=%cd',
+              '--date=format:%Y/%m%d %H:%M:%S'
+            ])
+            .catch(() => '')
+        ).trim()
+
+        if (fallback) {
+          const normalized = fallback.replace(' ', 'T')
+          const parsed = new Date(normalized)
+          commitTime = !Number.isNaN(parsed.getTime())
+            ? parsed.toLocaleString()
+            : fallback
+        }
       } catch {
-        commitTime = commit.latest.date
+        commitTime = ''
       }
     }
 
