@@ -10,7 +10,7 @@ export default function releaseInfo(options: ReleaseInfoOptions = {}): Any {
 
   return {
     name: pluginName,
-    enforce: 'post',
+    enforce: 'pre',
 
     async transformIndexHtml(html: string, _ctx: IndexHtmlTransformContext) {
       const isProd = process.env.NODE_ENV === 'production'
