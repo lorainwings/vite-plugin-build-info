@@ -18,6 +18,20 @@ describe('Tag发布测试', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
+    // 清理可能影响分支/标签检测的CI环境变量，避免CI环境泄漏干扰测试期望
+    const envKeys = [
+      'BRANCH_NAME',
+      'GIT_LOCAL_BRANCH',
+      'GIT_BRANCH',
+      'CHANGE_BRANCH',
+      'GITHUB_HEAD_REF',
+      'GITHUB_REF_NAME',
+      'CI_COMMIT_REF_NAME',
+      'CI_COMMIT_BRANCH',
+      'CI_BRANCH'
+    ] as const
+    for (const key of envKeys) delete process.env[key]
+
     mockGit.log.mockResolvedValue({
       latest: {
         hash: 'def456789abcdef',

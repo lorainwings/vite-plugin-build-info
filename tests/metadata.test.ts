@@ -19,6 +19,20 @@ describe('generateMetadata', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
+    // 处理可能来自CI环境的分支/标签相关环境变量，避免干扰测试期望
+    const envKeys = [
+      'BRANCH_NAME',
+      'GIT_LOCAL_BRANCH',
+      'GIT_BRANCH',
+      'CHANGE_BRANCH',
+      'GITHUB_HEAD_REF',
+      'GITHUB_REF_NAME',
+      'CI_COMMIT_REF_NAME',
+      'CI_COMMIT_BRANCH',
+      'CI_BRANCH'
+    ] as const
+    for (const key of envKeys) delete process.env[key]
+
     // 默认模拟分支模式
     mockGit.branch.mockResolvedValue({ current: 'main' })
     mockGit.log.mockResolvedValue({

@@ -1,6 +1,6 @@
 # Contributing Guide
 
-Thank you for your interest in contributing to `vite-plugin-release-info`! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to `@hhfe/vite-plugin-release-info`! This document provides guidelines for contributing to the project.
 
 ## Development Setup
 

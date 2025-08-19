@@ -160,3 +160,6 @@ export interface ConsoleLogConfig {
   useEmojis: boolean
   metadata: BuildMetadata
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Any = any
