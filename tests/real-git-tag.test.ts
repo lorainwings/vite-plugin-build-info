@@ -7,7 +7,8 @@ const mockGit = {
   getRemotes: vi.fn(),
   tags: vi.fn(),
   revparse: vi.fn(),
-  tag: vi.fn()
+  tag: vi.fn(),
+  raw: vi.fn()
 }
 
 vi.mock('simple-git', () => ({
@@ -51,6 +52,7 @@ describe('真实Git Tag发布场景测试', () => {
         { refs: { fetch: 'https://github.com/username/repo-name.git' } }
       ])
       mockGit.tags.mockResolvedValue({ latest: 'v1.2.3' })
+      mockGit.raw.mockResolvedValue('2024/0120 15:30:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -78,6 +80,7 @@ describe('真实Git Tag发布场景测试', () => {
         { refs: { fetch: 'https://github.com/username/repo-name.git' } }
       ])
       mockGit.tags.mockResolvedValue({ latest: 'v2.0.0-rc.1' })
+      mockGit.raw.mockResolvedValue('2024/0121 09:15:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -105,6 +108,7 @@ describe('真实Git Tag发布场景测试', () => {
         { refs: { fetch: 'https://gitlab.com/username/repo-name.git' } }
       ])
       mockGit.tags.mockResolvedValue({ latest: 'v3.1.0' })
+      mockGit.raw.mockResolvedValue('2024/0122 14:45:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -132,6 +136,7 @@ describe('真实Git Tag发布场景测试', () => {
         { refs: { fetch: 'git@internal-git.company.com:enterprise/repo.git' } }
       ])
       mockGit.tags.mockResolvedValue({ latest: 'enterprise-v4.5.0' })
+      mockGit.raw.mockResolvedValue('2024/0123 11:20:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -157,6 +162,7 @@ describe('真实Git Tag发布场景测试', () => {
         { refs: { fetch: 'git@internal-git.company.com:enterprise/repo.git' } }
       ])
       mockGit.tags.mockResolvedValue({ latest: 'hotfix-2024-01-23-001' })
+      mockGit.raw.mockResolvedValue('2024/0123 16:30:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -184,6 +190,7 @@ describe('真实Git Tag发布场景测试', () => {
         { refs: { fetch: 'https://github.com/username/repo-name.git' } }
       ])
       mockGit.tags.mockResolvedValue({ latest: 'dev-v1.0.0-build.123' })
+      mockGit.raw.mockResolvedValue('2024/0124 08:00:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -208,6 +215,7 @@ describe('真实Git Tag发布场景测试', () => {
         { refs: { fetch: 'https://github.com/username/repo-name.git' } }
       ])
       mockGit.tags.mockResolvedValue({ latest: 'prod-v1.0.0' })
+      mockGit.raw.mockResolvedValue('2024/0124 20:00:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -234,6 +242,7 @@ describe('真实Git Tag发布场景测试', () => {
         { refs: { fetch: 'https://github.com/username/repo-name.git' } }
       ])
       mockGit.tags.mockResolvedValue({ latest: 'v5.0.0' })
+      mockGit.raw.mockResolvedValue('2024/0125 10:00:00')
 
       const metadata = await generateMetadata({
         includeGitInfo: true,

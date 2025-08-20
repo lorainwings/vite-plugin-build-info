@@ -8,7 +8,8 @@ const mockGit = {
   getRemotes: vi.fn(),
   tags: vi.fn(),
   revparse: vi.fn(),
-  tag: vi.fn()
+  tag: vi.fn(),
+  raw: vi.fn()
 }
 
 vi.mock('simple-git', () => ({
@@ -50,6 +51,7 @@ describe('generateMetadata', () => {
     mockGit.tags.mockResolvedValue({ latest: 'v1.0.0' })
     mockGit.revparse.mockResolvedValue('main')
     mockGit.tag.mockResolvedValue('')
+    mockGit.raw.mockResolvedValue('2024/0101 00:00:00')
   })
 
   it('should generate basic metadata', async () => {
@@ -120,5 +122,65 @@ describe('generateMetadata', () => {
 
     delete process.env.TEST_ENV
     delete process.env.VITE_TEST
+  })
+
+  it('should handle commitTime fallback mechanisms', async () => {
+    // 模拟 Git 信息为空的情况
+    mockGit.log.mockResolvedValue({
+      latest: {
+        hash: 'abc123',
+        message: 'test commit',
+        author_name: 'Test User',
+        author_email: 'test@example.com',
+        date: undefined // 故意设置为 undefined
+      }
+    })
+
+    // 模拟 Promise.all 中的调用顺序
+    // fallbackCommitTime (第7个) 返回空，gitShowTime (第8个) 返回时间
+    mockGit.raw
+      .mockResolvedValueOnce('') // fallbackCommitTime: log 命令返回空
+      .mockResolvedValueOnce('2024/0115 10:30:00') // gitShowTime: show 命令返回时间
+
+    const metadata = await generateMetadata({ includeGitInfo: true })
+
+    expect(metadata.git?.commitTime).toBeDefined()
+    expect(typeof metadata.git?.commitTime).toBe('string')
+    // 由于 git show 返回的时间格式是 '2024/0115 10:30:00'，我们需要验证这个格式
+    expect(metadata.git?.commitTime).toMatch(/2024\/\d{4} \d{2}:\d{2}:\d{2}/)
+  })
+
+  it('should use current time as final fallback when all git commands fail', async () => {
+    // 模拟所有 Git 命令都失败的情况
+    mockGit.log.mockResolvedValue({
+      latest: {
+        hash: 'abc123',
+        message: 'test commit',
+        author_name: 'Test User',
+        author_email: 'test@example.com',
+        date: undefined
+      }
+    })
+    mockGit.raw.mockResolvedValue('') // 所有 raw 命令都返回空
+
+    const beforeTest = new Date()
+    const metadata = await generateMetadata({ includeGitInfo: true })
+    const afterTest = new Date()
+
+    expect(metadata.git?.commitTime).toBeDefined()
+    expect(typeof metadata.git?.commitTime).toBe('string')
+
+    // 验证时间在当前时间范围内
+    const commitTimeStr = metadata.git?.commitTime
+    expect(commitTimeStr).toBeDefined()
+    if (commitTimeStr) {
+      const commitTime = new Date(commitTimeStr)
+      expect(commitTime.getTime()).toBeGreaterThanOrEqual(
+        beforeTest.getTime() - 1000
+      )
+      expect(commitTime.getTime()).toBeLessThanOrEqual(
+        afterTest.getTime() + 1000
+      )
+    }
   })
 })

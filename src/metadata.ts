@@ -86,13 +86,31 @@ const getVersionInfo = async (): Promise<string | undefined> => {
 const getGitInfo = async (): Promise<BuildMetadata['git'] | undefined> => {
   try {
     const git = simpleGit()
-    const [branch, commit, remote, tags] = await Promise.all([
+
+    const [
+      branch,
+      commit,
+      remote,
+      tags,
+      currentRef,
+      tagAtHead,
+      fallbackCommitTime,
+      gitShowTime
+    ] = await Promise.all([
       git.branch().catch(() => ({ current: undefined }) as GitBranch),
       git
         .log({ maxCount: 1 })
         .catch(() => ({ latest: undefined }) as GitCommit),
       git.getRemotes(true).catch(() => [] as GitRemote[]),
-      git.tags().catch(() => ({ latest: undefined }) as GitTags)
+      git.tags().catch(() => ({ latest: undefined }) as GitTags),
+      git.revparse(['--abbrev-ref', 'HEAD']).catch(() => ''),
+      git.tag(['--points-at', 'HEAD']).catch(() => ''),
+      git
+        .raw(['log', '-1', '--format=%cd', '--date=format:%Y/%m/%d %H:%M:%S'])
+        .catch(() => ''),
+      git
+        .raw(['show', '-s', '--format=%cd', '--date=format:%Y/%m/%d %H:%M:%S'])
+        .catch(() => '')
     ])
 
     const envBranch = getBranchFromEnv()
@@ -108,65 +126,37 @@ const getGitInfo = async (): Promise<BuildMetadata['git'] | undefined> => {
       ? commit.latest.hash.slice(0, 7)
       : undefined
 
+    const isDetached = currentRef === 'HEAD'
     let releaseType: 'branch' | 'tag' | 'commit' = 'branch'
     let release: string | undefined = currentBranch
 
-    try {
-      const currentRef = await git
-        .revparse(['--abbrev-ref', 'HEAD'])
-        .catch(() => '')
-      const isDetached = currentRef === 'HEAD'
-
-      if (isDetached) {
-        const tagAtHead = await git.tag(['--points-at', 'HEAD']).catch(() => '')
-        if (tagAtHead) {
-          releaseType = 'tag'
-          release = tagAtHead
-        } else {
-          releaseType = 'commit'
-          release = short
-        }
+    if (isDetached) {
+      if (tagAtHead) {
+        releaseType = 'tag'
+        release = tagAtHead
       } else {
-        releaseType = 'branch'
-        release = currentBranch
+        releaseType = 'commit'
+        release = short
       }
-    } catch {
+    } else {
       releaseType = 'branch'
       release = currentBranch
     }
 
-    let commitTime: string | undefined
-    if (commit?.latest?.date) {
-      const parsed = new Date(commit.latest.date)
-      if (!Number.isNaN(parsed.getTime())) {
-        commitTime = parsed.toLocaleString()
-      }
+    const getCommitTime = (timeStr: string | undefined): string | undefined => {
+      if (!timeStr) return undefined
+      const trimmed = timeStr.trim()
+      if (!trimmed) return undefined
+      const normalized = trimmed.replace(' ', 'T')
+      const parsed = new Date(normalized)
+      return !Number.isNaN(parsed.getTime()) ? parsed.toLocaleString() : trimmed
     }
 
-    if (!commitTime) {
-      try {
-        const fallback = (
-          await git
-            .raw([
-              'log',
-              '-1',
-              '--format=%cd',
-              '--date=format:%Y/%m%d %H:%M:%S'
-            ])
-            .catch(() => '')
-        ).trim()
-
-        if (fallback) {
-          const normalized = fallback.replace(' ', 'T')
-          const parsed = new Date(normalized)
-          commitTime = !Number.isNaN(parsed.getTime())
-            ? parsed.toLocaleString()
-            : fallback
-        }
-      } catch {
-        commitTime = ''
-      }
-    }
+    const commitTime =
+      getCommitTime(commit?.latest?.date) ||
+      getCommitTime(fallbackCommitTime) ||
+      getCommitTime(gitShowTime) ||
+      new Date().toLocaleString()
 
     return {
       branch: currentBranch,
@@ -302,10 +292,22 @@ export const generateMetadata = async (
     envPrefixes = ['NODE_ENV', 'VITE_', 'JENKINS_', 'CI_']
   } = options
 
-  // 使用函数组合的方式构建元数据
+  const asyncTasks: Promise<any>[] = []
+
+  if (includeVersion) {
+    asyncTasks.push(getVersionInfo())
+  }
+
+  if (includeGitInfo) {
+    asyncTasks.push(getGitInfo())
+  }
+
+  asyncTasks.push(processCustomFields(customFields))
+
+  const [version, git, custom] = await Promise.all(asyncTasks)
+
   const metadata: Partial<BuildMetadata> = {}
 
-  // 构建时间
   if (includeBuildTime) {
     const buildTimeInfo = getBuildTimeInfo()
     metadata.buildTime = buildTimeInfo.buildTime
@@ -319,12 +321,12 @@ export const generateMetadata = async (
 
   // 版本信息
   if (includeVersion) {
-    metadata.version = await getVersionInfo()
+    metadata.version = version
   }
 
   // Git 信息
   if (includeGitInfo) {
-    metadata.git = await getGitInfo()
+    metadata.git = git
   }
 
   // CI 信息
@@ -336,7 +338,7 @@ export const generateMetadata = async (
   }
 
   // 自定义字段
-  metadata.custom = await processCustomFields(customFields)
+  metadata.custom = custom
 
   return metadata as BuildMetadata
 }

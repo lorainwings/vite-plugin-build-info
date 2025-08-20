@@ -7,7 +7,8 @@ const mockGit = {
   getRemotes: vi.fn(),
   tags: vi.fn(),
   revparse: vi.fn(),
-  tag: vi.fn()
+  tag: vi.fn(),
+  raw: vi.fn()
 }
 
 vi.mock('simple-git', () => ({
@@ -45,6 +46,7 @@ describe('Tag发布测试', () => {
       { refs: { fetch: 'https://github.com/test/repo.git' } }
     ])
     mockGit.tags.mockResolvedValue({ latest: 'v2.1.0' })
+    mockGit.raw.mockResolvedValue('2024/0115 10:30:00')
   })
 
   describe('语义化版本标签发布', () => {
@@ -101,6 +103,7 @@ describe('Tag发布测试', () => {
       mockGit.revparse.mockResolvedValue('HEAD')
       mockGit.tag.mockResolvedValue('hotfix-bug-123')
       mockGit.branch.mockResolvedValue({ current: undefined })
+      mockGit.raw.mockResolvedValue('2024/0115 10:30:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -114,6 +117,7 @@ describe('Tag发布测试', () => {
       mockGit.revparse.mockResolvedValue('HEAD')
       mockGit.tag.mockResolvedValue('v2.1.0')
       mockGit.branch.mockResolvedValue({ current: undefined })
+      mockGit.raw.mockResolvedValue('2024/0115 10:30:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -136,6 +140,7 @@ describe('Tag发布测试', () => {
       mockGit.revparse.mockResolvedValue('HEAD')
       mockGit.tag.mockResolvedValue('v2.1.0')
       mockGit.branch.mockResolvedValue({ current: undefined })
+      mockGit.raw.mockResolvedValue('2024/0115 10:30:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -149,6 +154,7 @@ describe('Tag发布测试', () => {
       mockGit.revparse.mockResolvedValue('HEAD')
       mockGit.tag.mockResolvedValue('v2.1.0')
       mockGit.branch.mockResolvedValue({ current: 'main' })
+      mockGit.raw.mockResolvedValue('2024/0115 10:30:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -161,6 +167,7 @@ describe('Tag发布测试', () => {
       mockGit.revparse.mockResolvedValue('main')
       mockGit.tag.mockResolvedValue('')
       mockGit.branch.mockResolvedValue({ current: 'main' })
+      mockGit.raw.mockResolvedValue('2024/0115 10:30:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -174,6 +181,7 @@ describe('Tag发布测试', () => {
       mockGit.revparse.mockRejectedValue(new Error('Git error'))
       mockGit.tag.mockRejectedValue(new Error('Tag error'))
       mockGit.branch.mockResolvedValue({ current: 'main' })
+      mockGit.raw.mockResolvedValue('2024/0115 10:30:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -185,6 +193,7 @@ describe('Tag发布测试', () => {
       mockGit.revparse.mockResolvedValue('HEAD')
       mockGit.tag.mockResolvedValue('')
       mockGit.branch.mockResolvedValue({ current: 'main' })
+      mockGit.raw.mockResolvedValue('2024/0115 10:30:00')
 
       const metadata = await generateMetadata({ includeGitInfo: true })
 
@@ -198,6 +207,7 @@ describe('Tag发布测试', () => {
       mockGit.revparse.mockResolvedValue('HEAD')
       mockGit.tag.mockResolvedValue('v2.1.0')
       mockGit.branch.mockResolvedValue({ current: undefined })
+      mockGit.raw.mockResolvedValue('2024/0115 10:30:00')
 
       const startTime = Date.now()
       const metadata = await generateMetadata({ includeGitInfo: true })
