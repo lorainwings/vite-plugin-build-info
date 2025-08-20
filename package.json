@@ -1,6 +1,6 @@
 {
   "name": "@hhfe/vite-plugin-release-info",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A Vite plugin for injecting release metadata and version information into index.html",
   "type": "module",
   "main": "dist/index.cjs",
